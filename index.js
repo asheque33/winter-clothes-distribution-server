@@ -9,7 +9,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors({ origin: "http://localhost:5174", credentials: true }));
+app.use(cors({ origin: true, credentials: true }));
 // app.use(cors());
 app.use(express.json());
 
@@ -120,18 +120,18 @@ async function run() {
         data: result,
       });
     });
-    app.patch("/winter-clothes/:id", async (req, res) => {
+    app.put("/winter-clothes/:id", async (req, res) => {
       const id = req.params.id;
       const data = req.body;
       const query = { _id: new ObjectId(id) };
       const options = { upsert: true };
       const updatedCloth = {
         $set: {
-          image: data.image,
+          // image: data.image,
           title: data.title,
           category: data.category,
           size: data.size,
-          description: data.description,
+          // description: data.description,
         },
       };
       const result = await winterClothesCollection.updateOne(
