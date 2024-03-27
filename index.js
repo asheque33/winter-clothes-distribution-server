@@ -29,6 +29,10 @@ async function run() {
     const db = client.db("wc-project");
     const userCollection = db.collection("users");
     const winterClothesCollection = db.collection("winter-clothes");
+    const donationsCollection = db.collection("donations");
+    const communityCommentsCollection = db.collection("comments");
+    const testimonialsCollection = db.collection("testimonials");
+    const volunteersCollection = db.collection("volunteers");
 
     // User Registration
     app.post("/api/auth/register", async (req, res) => {
@@ -120,18 +124,18 @@ async function run() {
         data: result,
       });
     });
-    app.put("/winter-clothes/:id", async (req, res) => {
+    app.patch("/winter-clothes/:id", async (req, res) => {
       const id = req.params.id;
       const data = req.body;
       const query = { _id: new ObjectId(id) };
       const options = { upsert: true };
       const updatedCloth = {
         $set: {
-          // image: data.image,
+          image: data.image,
           title: data.title,
           category: data.category,
           size: data.size,
-          // description: data.description,
+          description: data.description,
         },
       };
       const result = await winterClothesCollection.updateOne(
@@ -154,6 +158,88 @@ async function run() {
         message: "Winter cloth deleted successfully",
         data: result,
       });
+    });
+    // Donors list from Donations collection
+    app.get("/leaderboard", async (req, res) => {
+      const result = await donationsCollection.find().toArray();
+      res.status(200).json({
+        success: true,
+        message: "Donors retrieved successfully",
+        data: result,
+      });
+    });
+    // Create comments posted by the user
+    app.post("/comment", async (req, res) => {
+      const { name, comment } = req.body;
+      const result = await communityCommentsCollection.insertOne({
+        name,
+        comment,
+      });
+      if (result) {
+        res.status(201).json({
+          success: true,
+          message: "Comment created successfully",
+          data: req.body,
+        });
+      }
+    });
+    // Get comments posted by the user
+    app.get("/comments", async (req, res) => {
+      const result = await communityCommentsCollection.find().toArray();
+      res.status(200).json({
+        success: true,
+        message: "Comments retrieved successfully",
+        data: result,
+      });
+    });
+    // Create Testimonial posted by the donor
+    app.post("/dashboard/create-testimonial", async (req, res) => {
+      const { name, testimonial } = req.body;
+      const result = await testimonialsCollection.insertOne({
+        name,
+        testimonial,
+      });
+      if (result) {
+        res.status(201).json({
+          success: true,
+          message: "Testimonial created successfully",
+          data: req.body,
+        });
+      }
+    });
+    // Get testimonials posted by the donors
+    app.get("/testimonials", async (req, res) => {
+      const result = await testimonialsCollection.find().toArray();
+      res.status(200).json({
+        success: true,
+        message: "Testimonials retrieved successfully",
+        data: result,
+      });
+    });
+    // Get volunteers posted by the users
+    app.get("/volunteers", async (req, res) => {
+      const result = await volunteersCollection.find().toArray();
+      res.status(200).json({
+        success: true,
+        message: "Volunteers retrieved successfully",
+        data: result,
+      });
+    });
+    // Create Volunteer posted by the user
+    app.post("/volunteer", async (req, res) => {
+      const { email, phoneNumber, location } = req.body;
+      const result = await volunteersCollection.insertOne({
+        email,
+        phoneNumber,
+        location,
+      });
+      if (result) {
+        res.status(201).json({
+          success: true,
+          message: "Volunteer created successfully",
+          data: req.body,
+        });
+      }
     });
 
     // ==============================================================
